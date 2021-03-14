@@ -22,7 +22,7 @@ const App: () => Node = () => {
       initialRouteName='Loading Screen'
       screenOptions={{
         headerStyle: {
-          backgroundColor: '1c1c1e',
+          backgroundColor: '#1c1c1e',
         },
         headerTintColor: '#edf6f9',
       }}>
@@ -38,6 +38,10 @@ const App: () => Node = () => {
           headerTitle: 'Hello',
           headerLeft: null,
           gestureEnabled: false,
+          headerStyle: {
+            backgroundColor: '#1c1c1e'
+          },
+          headerTintColor: '#edf6f9',
         }}
         />
         <Stack.Screen
