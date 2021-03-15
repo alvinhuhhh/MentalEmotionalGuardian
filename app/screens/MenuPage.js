@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { Component, useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useIsFocused, useNavigationState } from '@react-navigation/native';
 import {
   StyleSheet,
   View,
@@ -11,9 +11,11 @@ import {
 
 function MenuPage({ navigation }) {
   useEffect(() => {
-    BackHandler.addEventListener('hardwareBackPress', () => true)
-    return () =>
-      BackHandler.removeEventListener('hardwareBackPress', () => true)
+    BackHandler.addEventListener('hardwareBackPress', () => {
+      if (navigation.isFocused()) {
+        BackHandler.exitApp();
+      };
+    });
   }, []);
 
   return (
