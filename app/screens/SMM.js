@@ -58,6 +58,7 @@ function SMM({ navigation }) {
       rating: '0.5',
     },];
     setPosts(newPost.concat(posts));
+    onChangeText('');
     console.log(posts);
   });
 
@@ -77,6 +78,7 @@ function SMM({ navigation }) {
           style={styles.textInput}
           placeholder={'Type your post here...'}
           onChangeText={text => onChangeText(text)}
+          value={text}
           />
           <TouchableOpacity
           style={styles.send}
