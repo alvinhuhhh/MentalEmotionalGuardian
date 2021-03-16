@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useEffect } from 'react';
+import { NavigationContainer, useIsFocused } from '@react-navigation/native';
 import {
   StyleSheet,
   View,
@@ -9,9 +9,21 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  BackHandler,
 } from 'react-native';
+import { BleManager } from 'react-native-ble-plx';
 
 function Wearable({ navigation }) {
+  console.log("page entered");
+  var focused=useIsFocused();
+  const manager=new BleManager();
+  console.log('New BleManager created');
+  console.log("focused value is",focused);
+  if (!focused){
+    manager.destroy();
+    console.log('BleManager destroyed');
+    console.log("page exited");
+  }
   return (
     <View style={styles.container}>
       <View style={styles.profileArea}>
@@ -75,6 +87,8 @@ function Wearable({ navigation }) {
     </View>
   );
 };
+
+
 
 const styles = StyleSheet.create({
   container: {
