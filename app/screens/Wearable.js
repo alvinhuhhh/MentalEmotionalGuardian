@@ -32,7 +32,7 @@ function Wearable({ navigation }) {
         </View>
         <View style={styles.dataAreaBorderPadding}></View>
         <TouchableOpacity
-        style={[styles.buttonArea, {justifyContent: 'flex-end', alignSelf: 'flex-end'}]}
+        style={[styles.buttonStyle, {justifyContent: 'flex-end', alignSelf: 'flex-end'}]}
         onPress={null}
         >
           <Text>Measure</Text>
