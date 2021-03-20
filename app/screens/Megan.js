@@ -1,11 +1,13 @@
 import 'react-native-gesture-handler';
 import React, { useState, useCallback, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { GiftedChat } from 'react-native-gifted-chat';
+import { GiftedChat, InputToolbar } from 'react-native-gifted-chat';
 import {
   Platform,
   StyleSheet,
   View,
+  TouchableOpacity,
+  Text,
 } from 'react-native';
 
 const APIUrl = 'https://meg-backend-46.herokuapp.com/Megan/';
@@ -58,6 +60,21 @@ function Megan({ navigation }) {
     setFirstStart(false);
   };
 
+  let disableInput = true;
+
+  function renderActions(props) {
+    return (
+      <View style={styles.actions}>
+        <TouchableOpacity
+        style={styles.touchable}
+        onPress={null}
+        >
+          <Text style={styles.text}>Hello!</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <GiftedChat
@@ -66,6 +83,8 @@ function Megan({ navigation }) {
       user={{
         _id: 1,
       }}
+      renderInputToolbar={disableInput ? (props) => renderActions(props) : undefined}
+      minInputToolbarHeight={disableInput ? 88 : undefined}
       />
     </View>
   );
@@ -75,6 +94,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#121212',
+  },
+  actions: {
+    height: 88,
+    width: '100%',
+    backgroundColor: '#222222',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  touchable: {
+    height: 48,
+    width: 96,
+    borderRadius: 15,
+    backgroundColor: '#E29578',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  text: {
+    fontSize: 18,
+    color: '#121212',
   },
 });
 
