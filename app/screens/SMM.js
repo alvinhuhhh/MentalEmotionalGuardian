@@ -11,6 +11,10 @@ import {
   Touchable,
 } from 'react-native';
 
+const rating={'0':'No risk','1':'Slight risk','2':'High risk'};
+
+const APIUrl = 'https://meg-backend-46.herokuapp.com/sid/';
+
 function SMM({ navigation }) {
   const [text, onChangeText] = useState("");
   const [username, setUsername] = useState("Ah Boy");
@@ -47,19 +51,37 @@ function SMM({ navigation }) {
       />
     );
   };
-
+  async function getReply(url, text) {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        'text': text
+      })
+    }).then(response => {
+      if (response.ok) {
+        return response.json();
+      }
+      throw new Error('Request failed.');
+    }, networkError => console.log(networkError.message)
+    ).then(jsonResponse => {
+      let newPost = [{
+        id: (posts.length + 1).toString(),
+        username: username,
+        handle: handle,
+        timestamp: (new Date()).toDateString(),
+        maintext: text,
+        rating: rating[jsonResponse.toString()],
+      },];
+      setPosts(newPost.concat(posts));
+      onChangeText('');
+      console.log(posts);
+    });
+  };
   const onSend = useCallback(() => {
-    let newPost = [{
-      id: (posts.length + 1).toString(),
-      username: username,
-      handle: handle,
-      timestamp: (new Date()).toDateString(),
-      maintext: text,
-      rating: '0.5',
-    },];
-    setPosts(newPost.concat(posts));
-    onChangeText('');
-    console.log(posts);
+    getReply(APIUrl, text);
   });
 
   return (
