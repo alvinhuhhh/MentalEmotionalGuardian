@@ -10,6 +10,7 @@ import {
   TextInput,
   TouchableOpacity,
   BackHandler,
+  Linking,
 } from 'react-native';
 import { BleManager, fullUUID } from 'react-native-ble-plx';
 
@@ -18,7 +19,7 @@ function Wearable({ navigation }) {
   var [stillSamePage,inPage]=useState(false);
   var [connected,testConn] = useState(false);
   var focused=useIsFocused();
-  var bluetoothDevice=useState();
+  var [bluetoothDevice,setBluetoothDevice]=useState();
   var deviceID;
   if (!stillSamePage){
     console.log("Watch page entered");
@@ -181,15 +182,15 @@ function Wearable({ navigation }) {
       if (device.name === 'Bluefruit HRM') {
         console.log('Device found!');
         manager.stopDeviceScan();
-        bluetoothDevice=device;
+        setBluetoothDevice(device);
         deviceID=device.id
         //console.log('device.id:',device.id)
         console.log('deviceID=device.id=',deviceID)
         //console.log('device:',device)
         device.connect()
-        .then(async (device) => {
+        .then((device) => {
           //return manager.discoverAllServicesAndCharacteristicsForDevice(device.id)
-          return await device.discoverAllServicesAndCharacteristics();
+          return device.discoverAllServicesAndCharacteristics();
         }).then(() => {
             console.log('Device connected.');
             //bluetoothDevice.discoverAllServicesAndCharacteristics().then((scan)=>{console.log(scan)}).catch((error)=>{console.log(error)});
@@ -211,6 +212,7 @@ function Wearable({ navigation }) {
           manager.cancelDeviceConnection(deviceID)
           .then(() => {
             console.log('Disconnected.');
+            setBluetoothDevice();
           }).catch((error) => {
             console.log(error);
           });
@@ -262,8 +264,8 @@ function Wearable({ navigation }) {
         <View style={styles.dataAreaBorderPadding}></View>
         <TouchableOpacity
         style={[styles.buttonStyle, {justifyContent: 'flex-end', alignSelf: 'flex-end'}]}
-        //onPress={scanConnectGetDisconn}//works up to before value read
-        onPress={scanConnectGetDisconnTry}//tried
+        onPress={scanConnectGetDisconn}//works up to before value read
+        //onPress={scanConnectGetDisconnTry}//tried
         //onPress={dataFlow}//nope
         //onPress={dataGetFlow}//nope
         >
@@ -300,7 +302,7 @@ function Wearable({ navigation }) {
         </TouchableOpacity>
         <TouchableOpacity
         style={styles.buttonStyle}
-        onPress={null}
+        onPress={()=>Linking.openURL("tel:+6518002214444")}
         >
           <Text style={styles.bottomButtonFont}>Get Help</Text>
         </TouchableOpacity>
