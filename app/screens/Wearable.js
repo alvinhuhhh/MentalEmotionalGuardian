@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer, useIsFocused } from '@react-navigation/native';
 import {
   StyleSheet,
@@ -9,79 +9,148 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  BackHandler,
+  Platform,
+  PermissionsAndroid,
 } from 'react-native';
 import { BleManager } from 'react-native-ble-plx';
+import { Buffer } from 'buffer';
 
 function Wearable({ navigation }) {
-  console.log("page entered");
-  var focused=useIsFocused();
-  const manager=new BleManager();
-  console.log('New BleManager created');
-  console.log("focused value is",focused);
-  if (!focused){
-    manager.destroy();
-    console.log('BleManager destroyed');
-    console.log("page exited");
+  var bluetoothDevice;
+  const bleService = '180d';
+  const bleCharacteristic = '2a37';
+
+  let manager = new BleManager();
+
+  if (Platform.OS === 'android' && Platform.Version >= 23) {
+    PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then((result) => {
+      if (result) {
+        console.log("Permissions are OK");
+      } else {
+        PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then((result) => {
+          if (result) {
+            console.log('Accept');
+          } else {
+            console.log('Refuse');
+          }
+        })
+      }
+    })
   }
+
+  async function scanAndConnect() {
+    manager.startDeviceScan(null, null, (error, device) => {
+      console.log(device.name);
+      if (error) {
+        console.log(error);
+        return;
+      }
+      if (device.name === 'Bluefruit HRM') {
+        console.log('Device found!');
+        manager.stopDeviceScan();
+
+        bluetoothDevice = device;
+
+        device.connect()
+        .then((device) => {
+          console.log('Device connected.');
+          return device.discoverAllServicesAndCharacteristics();
+        }).then((device) => {
+          return device.characteristicsForService(bleService);
+        }).then((services) => {
+          console.log(services);
+        }).catch((error) => {
+          console.log(error);
+        })
+      }
+    })
+  }
+
+  function stopScan() {
+    manager.stopDeviceScan();
+    console.log('Scanning stopped.');
+  }
+
+  async function disconnect() {
+    manager.cancelDeviceConnection(bluetoothDevice.id)
+    .then((device) => {
+      console.log('Device disconnected.');
+      return;
+    });
+  }
+
+  function monitor() {
+    console.log('Read');
+    manager.characteristicsForDevice(bluetoothDevice, bleService)
+    .then((chars) => {
+      console.log(chars);
+      return;
+    })
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.profileArea}>
         <View style={styles.profilePicture}/>
       </View>
+
       <View style={styles.dataArea}>
         <Text style={styles.sectionText}>Heart</Text>
         <View style={styles.rowInDataArea}>
-          <View style={styles.dataAreaBorderPadding}></View>
-          <View style={styles.hrSection}>
-            <Text style={styles.hrNumberFont}>[HR]</Text>
-            <Text style={styles.bpmFont}>BPM</Text>
-          </View>
+          <View style={styles.dataAreaBorderPadding}/>
+            <View style={styles.hrSection}>
+              <Text style={styles.hrNumberFont}>[HR]</Text>
+              <Text style={styles.bpmFont}>BPM</Text>
+            </View>
           <View style={styles.dataDisplayArea}>
             <Text>Display Area</Text>
           </View>
-          <View style={styles.dataAreaBorderPadding}></View>
+          <View style={styles.dataAreaBorderPadding}/>
         </View>
-        <View style={styles.dataAreaBorderPadding}></View>
+        <View style={styles.dataAreaBorderPadding}/>
         <TouchableOpacity
-        style={[styles.buttonStyle, {justifyContent: 'flex-end', alignSelf: 'flex-end'}]}
-        onPress={null}
-        >
+          style={[styles.buttonStyle, {justifyContent: 'flex-end', alignSelf: 'flex-end'}]}
+          onPress={monitor}
+          >
           <Text>Measure</Text>
         </TouchableOpacity>
-        <View style={styles.dataAreaBorderPadding}></View>
+        <View style={styles.dataAreaBorderPadding}/>
       </View>
       <View style={styles.paddingArea}/>
       <View style={styles.dataArea}>
         <Text style={styles.sectionText}>Sleep</Text>
         <View style={styles.rowInDataArea}>
-          <View style={styles.dataAreaBorderPadding}></View>
+          <View style={styles.dataAreaBorderPadding}/>
           <View style={styles.dataDisplayArea}>
             <Text>Sleep Chart</Text>
           </View>
-          <View style={styles.dataAreaBorderPadding}></View>
+          <View style={styles.dataAreaBorderPadding}/>
         </View>
-        <View style={styles.dataAreaBorderPadding}></View>
+        <View style={styles.dataAreaBorderPadding}/>
       </View>
+
       <View style={styles.paddingArea}/>
+
       <View style={styles.buttonArea}>
         <TouchableOpacity
-        style={styles.buttonStyle}
-        onPress={null}
-        >
-          <Text style={styles.bottomButtonFont}>Sync Watch</Text>
+          style={styles.buttonStyle}
+          onPress={scanAndConnect}
+          >
+          <Text style={styles.bottomButtonFont}>Scan</Text>
         </TouchableOpacity>
+
         <TouchableOpacity
-        style={styles.buttonStyle}
-        onPress={null}
-        >
-          <Text style={styles.bottomButtonFont}>Sync Data</Text>
+          style={styles.buttonStyle}
+          onPress={stopScan}
+          >
+          <Text style={styles.bottomButtonFont}>Stop Scan</Text>
         </TouchableOpacity>
+
         <TouchableOpacity
-        style={styles.buttonStyle}
-        onPress={null}
-        >
-          <Text style={styles.bottomButtonFont}>Get Help</Text>
+          style={styles.buttonStyle}
+          onPress={disconnect}
+          >
+          <Text style={styles.bottomButtonFont}>Disconnect</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -105,14 +174,14 @@ const styles = StyleSheet.create({
         alignSelf:"center"
     },
     profilePicture:{
-        height: 50,
-        width: 50,
-        borderRadius: 50,
+        height: 100,
+        width: 100,
+        borderRadius: 100,
         backgroundColor: '#E29578'
     },
     sectionText:{
-        fontSize:16,
-        paddingLeft:7
+        fontSize: 20,
+        paddingLeft: 8
     },
     dataArea: {
         flex:1,
@@ -148,12 +217,11 @@ const styles = StyleSheet.create({
         justifyContent:"center"
     },
     dataDisplayArea:{
-        flex:1,
-        alignItems:'center',
-        justifyContent:"center",
-        backgroundColor:"#ffffff",
-        borderWidth:2,
-        borderRadius:5
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: "center",
+        backgroundColor: "#ffffff",
+        borderRadius: 8
     },
     buttonArea:{
         flex: 0.5,
@@ -163,17 +231,10 @@ const styles = StyleSheet.create({
         backgroundColor:"#2C2C1E"
     },
     buttonStyle: {
-        //marginTop:10,
-        paddingTop:5,
-        paddingBottom:5,
-        marginLeft:5,
-        paddingLeft:10,
-        paddingRight:10,
-        marginRight:5,
-        backgroundColor:'#E29578',
-        borderRadius:10,
-        borderWidth: 1,
-        borderColor: '#fff'
+        padding: 10,
+        margin: 8,
+        backgroundColor: '#E29578',
+        borderRadius: 10,
       },
     bottomButtonFont:{
         fontSize:20
