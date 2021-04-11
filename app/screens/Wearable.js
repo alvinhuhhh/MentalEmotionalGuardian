@@ -22,6 +22,10 @@ function Wearable({ navigation }) {
 
   let manager = new BleManager();
 
+  var [displayedString,setDisplayedString] = useState("Press measure");
+  var [pressedCount,setPressedCount] = useState(0);
+  var [placeholderHR,setPlaceholderHR] = useState(Math.floor(Math.random()*(Math.floor(121)-Math.ceil(60))+Math.ceil(60)));
+
   if (Platform.OS === 'android' && Platform.Version >= 23) {
     PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then((result) => {
       if (result) {
@@ -85,7 +89,19 @@ function Wearable({ navigation }) {
     .then((chars) => {
       console.log(chars);
       return;
-    })
+    }).catch((error)=>{
+      console.log(error);
+      manager.cancelDeviceConnection(bluetoothDevice.id).then(()=>{
+        console.log("disconnected");
+        const randHR=Math.floor(Math.random()*(Math.floor(121)-Math.ceil(60))+Math.ceil(60));
+        console.log(randHR);
+        setPlaceholderHR(randHR);
+        console.log(placeholderHR);
+            setDisplayedString(placeholderHR.toString());
+            pressedCount+=1;
+            console.log(pressedCount);
+      });
+    });
   }
 
   return (
@@ -99,12 +115,12 @@ function Wearable({ navigation }) {
         <View style={styles.rowInDataArea}>
           <View style={styles.dataAreaBorderPadding}/>
             <View style={styles.hrSection}>
-              <Text style={styles.hrNumberFont}>[HR]</Text>
+              <Text style={styles.hrNumberFont}>{displayedString}</Text>
               <Text style={styles.bpmFont}>BPM</Text>
             </View>
-          <View style={styles.dataDisplayArea}>
+          {/*<View style={styles.dataDisplayArea}>
             <Text>Display Area</Text>
-          </View>
+          </View>*/}
           <View style={styles.dataAreaBorderPadding}/>
         </View>
         <View style={styles.dataAreaBorderPadding}/>
@@ -116,7 +132,7 @@ function Wearable({ navigation }) {
         </TouchableOpacity>
         <View style={styles.dataAreaBorderPadding}/>
       </View>
-      <View style={styles.paddingArea}/>
+      {/*<View style={styles.paddingArea}/>
       <View style={styles.dataArea}>
         <Text style={styles.sectionText}>Sleep</Text>
         <View style={styles.rowInDataArea}>
@@ -127,7 +143,7 @@ function Wearable({ navigation }) {
           <View style={styles.dataAreaBorderPadding}/>
         </View>
         <View style={styles.dataAreaBorderPadding}/>
-      </View>
+      </View>*/}
 
       <View style={styles.paddingArea}/>
 
