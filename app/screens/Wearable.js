@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   Platform,
   PermissionsAndroid,
+  Linking,
 } from 'react-native';
 import { BleManager } from 'react-native-ble-plx';
 import { Buffer } from 'buffer';
@@ -181,9 +182,9 @@ function Wearable({ navigation }) {
 
         <TouchableOpacity
           style={styles.buttonStyle}
-          onPress={disconnect}
+          onPress={()=>Linking.openURL("tel:+6518002214444")}
           >
-          <Text style={styles.bottomButtonFont}>Disconnect</Text>
+          <Text style={styles.bottomButtonFont}>Get Help</Text>
         </TouchableOpacity>
       </View>
     </View>
