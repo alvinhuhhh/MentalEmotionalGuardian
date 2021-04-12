@@ -22,9 +22,12 @@ function Wearable({ navigation }) {
 
   let manager = new BleManager();
 
+  var [noDevice,setNoDevice]=useState(true);
+
   var [displayedString,setDisplayedString] = useState("Press measure");
   var [pressedCount,setPressedCount] = useState(0);
   var [placeholderHR,setPlaceholderHR] = useState(Math.floor(Math.random()*(Math.floor(121)-Math.ceil(60))+Math.ceil(60)));
+  console.log('noDevice is:',noDevice);
 
   if (Platform.OS === 'android' && Platform.Version >= 23) {
     PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION).then((result) => {
@@ -85,29 +88,43 @@ function Wearable({ navigation }) {
 
   function monitor() {
     console.log('Read');
-    manager.characteristicsForDevice(bluetoothDevice, bleService)
-    .then((chars) => {
-      console.log(chars);
-      return;
-    }).catch((error)=>{
-      console.log(error);
-      manager.cancelDeviceConnection(bluetoothDevice.id).then(()=>{
-        console.log("disconnected");
-        const randHR=Math.floor(Math.random()*(Math.floor(121)-Math.ceil(60))+Math.ceil(60));
+    if (noDevice){
+      const randHR=Math.floor(Math.random()*(Math.floor(121)-Math.ceil(60))+Math.ceil(60));
         console.log(randHR);
         setPlaceholderHR(randHR);
         console.log(placeholderHR);
-            setDisplayedString(placeholderHR.toString());
+        setTimeout(() => {
+          setDisplayedString(placeholderHR.toString());
             pressedCount+=1;
             console.log(pressedCount);
+        }, 1500);
+            
+    }
+    else{
+      manager.characteristicsForDevice(bluetoothDevice, bleService)
+      .then((chars) => {
+        console.log(chars);
+        return;
+      }).catch((error)=>{
+        console.log(error);
+        manager.cancelDeviceConnection(bluetoothDevice.id).then(()=>{
+          console.log("disconnected");
+          const randHR=Math.floor(Math.random()*(Math.floor(121)-Math.ceil(60))+Math.ceil(60));
+          console.log(randHR);
+          setPlaceholderHR(randHR);
+          console.log(placeholderHR);
+              setDisplayedString(placeholderHR.toString());
+              pressedCount+=1;
+              console.log(pressedCount);
+        });
       });
-    });
+    }
   }
 
   return (
     <View style={styles.container}>
       <View style={styles.profileArea}>
-        <View style={styles.profilePicture}/>
+      <TouchableOpacity onPress={()=>setNoDevice(!noDevice)}><View style={styles.profilePicture}/></TouchableOpacity>
       </View>
 
       <View style={styles.dataArea}>
