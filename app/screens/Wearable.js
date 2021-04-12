@@ -146,7 +146,7 @@ function Wearable({ navigation }) {
           style={[styles.buttonStyle, {justifyContent: 'flex-end', alignSelf: 'flex-end'}]}
           onPress={monitor}
           >
-          <Text>Measure</Text>
+          <Text style={{fontSize: 16}}>Measure</Text>
         </TouchableOpacity>
         <View style={styles.dataAreaBorderPadding}/>
       </View>
